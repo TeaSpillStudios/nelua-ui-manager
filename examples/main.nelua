@@ -1,0 +1,24 @@
+require 'iterators'
+require 'raylib'
+require 'gui'
+
+InitWindow(1920, 1080, "Game")
+
+SetTargetFPS(60)
+
+global uiManager: UIManager
+
+uiManager:AddElement("TextBox", "Demo Textbox", 16, 16, 4, 66, "This is a text box!")
+uiManager:AddElement("Button", "Demo Button", 16, 96, 4, 66, "This is a button!")
+
+while not WindowShouldClose() do
+  uiManager:UpdateElements()
+
+  BeginDrawing()
+    ClearBackground(WHITE)
+
+    uiManager:DrawElements()
+  EndDrawing()
+end
+
+CloseWindow()

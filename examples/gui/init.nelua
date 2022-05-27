@@ -1,0 +1,219 @@
+-- Requires raylib and GUI module
+
+-- [[ Records ]] --
+
+global Button = @record{
+  x: cint,
+  y: cint,
+  w: cint,
+  h: cint,
+  padding: cint,
+  fSize: cint,
+  text: string,
+  name: string,
+  isClicked: boolean,
+  isHighlighted: boolean
+}
+
+global TextBox = @record {
+  x: cint,
+  y: cint,
+  w: cint,
+  h: cint,
+  padding: cint,
+  fSize: cint,
+  name: string,
+  text: string
+}
+
+global UIManager = @record{
+  buttons: [20]Button,
+  textBoxes: [20]TextBox,
+  index: cint,
+  uiIndex: cint -- Only variables, functions defined in "Record functions"
+}
+
+-- [[ Record functions ]] --
+
+function UIManager:ClearElements()
+  for i: usize, element: *Button in mipairs(self.buttons) do
+    self.buttons[i] = (Button){}
+  end
+
+  for i: usize, element: *TextBox in mipairs(self.textBoxes) do
+    self.textBoxes[i] = (TextBox){}
+  end
+end
+
+function UIManager:UpdateElements()
+
+  local Mouse = @record {
+    x: cint,
+    y: cint,
+  }
+
+  local mouse: Mouse
+
+  mouse.x = GetMouseX()
+  mouse.y = GetMouseY()
+
+  for i: usize, button: *Button in mipairs(self.buttons) do
+    if mouse.y >= button.y and mouse.y <= button.y + button.h and mouse.x >= button.x and mouse.x <= button.x + button.w then
+      button.isHighlighted = true
+      if IsMouseButtonDown(0) then
+        button.isClicked = true
+      else
+        button.isClicked = false
+      end
+    else
+      button.isHighlighted = false
+      button.isClicked = false
+    end
+  end
+end
+
+function UIManager:DrawElements()
+  for i: usize, button: Button in ipairs(self.buttons) do
+   DrawRectangle(button.x, button.y, button.w + button.padding * 2, button.h, BLACK)                                             
+   if button.isClicked and button.isHighlighted then
+     DrawRectangle(button.x + 4, button.y + 4, button.w - 4 + button.padding, button.h - 8, GRAY)
+   elseif button.isHighlighted then
+     DrawRectangle(button.x + 4, button.y + 4, button.w - 4 + button.padding, button.h - 8, LIGHTGRAY)
+   else
+     DrawRectangle(button.x + 4, button.y + 4, button.w - 4 + button.padding, button.h - 8, WHITE)
+   end
+
+   DrawText(button.text, button.x + 4 + button.padding, button.y + 4 + button.padding, button.fSize, BLACK)
+  end
+
+  for i: usize, textBox: TextBox in ipairs(self.textBoxes) do
+
+    DrawRectangle(textBox.x, textBox.y, textBox.w + textBox.padding * 2, textBox.h, BLACK)                                             
+   
+    DrawRectangle(textBox.x + 4, textBox.y + 4, textBox.w - 4 + textBox.padding, textBox.h - 8, WHITE)
+
+    DrawText(textBox.text, textBox.x + 4 + textBox.padding, textBox.y + 4 + textBox.padding, textBox.fSize, BLACK)
+  end
+end
+
+function Button:Setup()
+  local lx = self.x
+  local ty = self.y
+  local rx = self.x + MeasureText(self.text, self.fSize) + self.padding * 2
+  local by = self.y + self.fSize + self.padding * 2
+
+  self.w = rx - lx
+  self.h = by - ty
+end
+
+function TextBox:Setup() 
+  local lx = self.x
+  local ty = self.y
+  local rx = self.x + MeasureText(self.text, self.fSize) + self.padding * 2
+  local by = self.y + self.fSize + self.padding * 2
+                                                                        
+  self.w = rx - lx
+  self.h = by - ty
+end
+
+function UIManager:AddElement(uiType: string, uiName: string, uiX: cint, uiY: cint, uiPadding: cint, uiFSize: cint, uiText: string): cint
+
+  local isNameColliding: boolean = false
+
+  for i: usize, textBox: TextBox in ipairs (self.textBoxes) do
+    if uiName == textBox.name then
+      isNameColliding = true
+    end
+  end
+
+  for i: usize, button: Button in ipairs (self.buttons) do
+    if uiName == button.name then
+      isNameColliding = true
+    end
+  end
+
+  if isNameColliding then
+    print("ERROR: Colliding name for element.")
+
+    return -1
+  end
+
+  local uiTypeInt: cint
+
+  if uiType == "Button" then
+    uiTypeInt = 0
+  elseif uiType == "TextBox" then
+    uiTypeInt = 1
+  end
+
+  switch uiTypeInt do
+  case 0 then
+    
+    self.buttons[self.uiIndex] = (Button){
+      x = uiX,
+      y = uiY,
+      padding = uiPadding,
+      fSize = uiFSize,
+      text = uiText,
+      name = uiName,
+    }
+
+    self.buttons[self.uiIndex]:Setup()
+
+    self.uiIndex = self.uiIndex + 1
+  case 1 then
+    
+    self.textBoxes[self.uiIndex] = (TextBox) {
+      x = uiX,
+      y = uiY,
+      padding = uiPadding,
+      fSize = uiFSize,
+      text = uiText,
+      name = uiName
+    }
+
+    self.textBoxes[self.uiIndex]:Setup()
+
+    self.uiIndex = self.uiIndex + 1
+
+  end
+
+  return 0
+end
+
+function UIManager:RenameElement(uiType: string, oldName: string, newName: string)
+  
+  if uiType == "Button" then
+    for i: usize, element: *Button in mipairs(self.buttons) do -- Loop through UI Type array
+      if element.name == oldName then
+        element.name = newName
+      end
+    end
+  elseif uiType == "TextBox" then
+    for i: usize, element: *TextBox in mipairs(self.textBoxes) do -- Loop through UI Type array
+      if element.name == oldName then
+        element.name = newName
+      end
+    end
+  end
+end
+
+function UIManager:GetButton(name: string): Button
+  for i: usize, button: Button in ipairs(self.buttons) do
+    if button.name == name then
+      return button
+    end
+  end
+
+  return (Button){}
+end
+
+function UIManager:GetTextBox(name: string): TextBox
+  for i: usize, textBox: TextBox in ipairs(self.textBoxes) do
+    if textBox.name == name then
+      return textBox
+    end
+  end
+
+  return (TextBox){}
+end
