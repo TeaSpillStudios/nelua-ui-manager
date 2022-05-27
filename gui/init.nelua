@@ -26,7 +26,7 @@ global TextBox = @record {
   text: string
 }
 
-global UIManager = @record{
+global UIManagerClass = @record{
   buttons: [20]Button,
   textBoxes: [20]TextBox,
   index: cint,
@@ -35,7 +35,7 @@ global UIManager = @record{
 
 -- [[ Record functions ]] --
 
-function UIManager:ClearElements()
+function UIManagerClass:ClearElements()
   for i: usize, element: *Button in mipairs(self.buttons) do
     self.buttons[i] = (Button){}
   end
@@ -45,7 +45,7 @@ function UIManager:ClearElements()
   end
 end
 
-function UIManager:UpdateElements()
+function UIManagerClass:UpdateElements()
 
   local Mouse = @record {
     x: cint,
@@ -72,7 +72,7 @@ function UIManager:UpdateElements()
   end
 end
 
-function UIManager:DrawElements()
+function UIManagerClass:DrawElements()
   for i: usize, button: Button in ipairs(self.buttons) do
    DrawRectangle(button.x, button.y, button.w + button.padding * 2, button.h, BLACK)                                             
    if button.isClicked and button.isHighlighted then
@@ -116,7 +116,7 @@ function TextBox:Setup()
   self.h = by - ty
 end
 
-function UIManager:AddElement(uiType: string, uiName: string, uiX: cint, uiY: cint, uiPadding: cint, uiFSize: cint, uiText: string): cint
+function UIManagerClass:AddElement(uiType: string, uiName: string, uiX: cint, uiY: cint, uiPadding: cint, uiFSize: cint, uiText: string): cint
 
   local isNameColliding: boolean = false
 
@@ -181,7 +181,7 @@ function UIManager:AddElement(uiType: string, uiName: string, uiX: cint, uiY: ci
   return 0
 end
 
-function UIManager:RenameElement(uiType: string, oldName: string, newName: string)
+function UIManagerClass:RenameElement(uiType: string, oldName: string, newName: string)
   
   if uiType == "Button" then
     for i: usize, element: *Button in mipairs(self.buttons) do -- Loop through UI Type array
@@ -198,7 +198,7 @@ function UIManager:RenameElement(uiType: string, oldName: string, newName: strin
   end
 end
 
-function UIManager:GetButton(name: string): Button
+function UIManagerClass:GetButton(name: string): Button
   for i: usize, button: Button in ipairs(self.buttons) do
     if button.name == name then
       return button
@@ -208,7 +208,7 @@ function UIManager:GetButton(name: string): Button
   return (Button){}
 end
 
-function UIManager:GetTextBox(name: string): TextBox
+function UIManagerClass:GetTextBox(name: string): TextBox
   for i: usize, textBox: TextBox in ipairs(self.textBoxes) do
     if textBox.name == name then
       return textBox
@@ -217,3 +217,21 @@ function UIManager:GetTextBox(name: string): TextBox
 
   return (TextBox){}
 end
+
+function UIManagerClass:DeleteElement(uiType: string, name: string) do
+  if uiType == "Button" then
+    for i: usize, button: *Button in mipairs(self.buttons) do
+      if button.name == name then
+        self.buttons[i] = (Button){}
+      end
+    end
+  elseif uiType == "TextBox" then
+    for i: usize, textbox: *TextBox in mipairs(self.textboxes) do
+      if textbox.name == name then
+        self.textboxes[i] = (TextBox){}
+      end
+    end
+  end
+end
+
+global UIManager: UIManagerClass
