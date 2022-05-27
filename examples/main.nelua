@@ -6,18 +6,20 @@ InitWindow(1920, 1080, "Game")
 
 SetTargetFPS(60)
 
-global uiManager: UIManager
-
-uiManager:AddElement("TextBox", "Demo Textbox", 16, 16, 4, 66, "This is a text box!")
-uiManager:AddElement("Button", "Demo Button", 16, 96, 4, 66, "This is a button!")
+UIManager:AddElement("TextBox", "Demo Textbox", 16, 16, 4, 66, "This is a text box!")
+UIManager:AddElement("Button", "Demo Button", 16, 96, 4, 66, "This is a button!")
 
 while not WindowShouldClose() do
-  uiManager:UpdateElements()
+  UIManager:UpdateElements()
+
+  if UIManager:GetButton("Demo Button").isClicked then
+    print("The button is being clicked!")
+  end
 
   BeginDrawing()
     ClearBackground(WHITE)
 
-    uiManager:DrawElements()
+    UIManager:DrawElements()
   EndDrawing()
 end
 
