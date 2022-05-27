@@ -218,17 +218,19 @@ function UIManagerClass:GetTextBox(name: string): TextBox
   return (TextBox){}
 end
 
-function UIManagerClass:DeleteElement(uiType: string, name: string) do
+function UIManagerClass:DeleteElement(uiType: string, name: string)
   if uiType == "Button" then
     for i: usize, button: *Button in mipairs(self.buttons) do
       if button.name == name then
         self.buttons[i] = (Button){}
       end
     end
-  elseif uiType == "TextBox" then
-    for i: usize, textbox: *TextBox in mipairs(self.textboxes) do
+  end
+
+  if uiType == "TextBox" then
+    for i: usize, textbox: *TextBox in mipairs(self.textBoxes) do
       if textbox.name == name then
-        self.textboxes[i] = (TextBox){}
+        self.textBoxes[i] = (TextBox){}
       end
     end
   end
